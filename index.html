@@ -7,150 +7,164 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cb-bg: #0e121b;
-            --cb-panel: #161b28;
-            --cb-accent: #ffb700; /* Золото */
-            --cb-blue: #2c71ff;
-            --success: #2ecc71;
-            --error: #e74c3c;
+            --bg-dark: #0f1118;
+            --panel-bg: #1a1d26;
+            --accent-yellow: #f1b32d;
+            --text-gray: #8b95a5;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
         }
 
         body {
-            background-color: var(--cb-bg);
+            background-color: var(--bg-dark);
             color: white;
             font-family: 'Exo 2', sans-serif;
-            margin: 0; padding: 10px;
+            margin: 0; padding: 15px;
             display: flex; flex-direction: column; align-items: center;
-        }
-
-        /* Шапка */
-        .header {
-            width: 100%; max-width: 400px;
-            display: flex; justify-content: space-between;
-            background: var(--cb-panel); padding: 15px;
-            border-radius: 12px; border-bottom: 3px solid var(--cb-accent);
-            margin-bottom: 20px; box-sizing: border-box;
-        }
-
-        /* Історія */
-        .history {
-            display: flex; gap: 8px; margin-bottom: 20px;
-            width: 100%; max-width: 400px; justify-content: center;
-        }
-        .hist-item {
-            padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;
-            background: var(--cb-panel); border: 1px solid rgba(255,255,255,0.1);
-        }
-        .win { color: var(--success); border-color: var(--success); }
-        .lose { color: var(--error); border-color: var(--error); }
-
-        /* КОЛЕСО УДАЧІ */
-        .wheel-outer {
-            position: relative; width: 250px; height: 250px;
-            margin-bottom: 30px;
-        }
-
-        /* Стрілка-вказівник */
-        .wheel-arrow {
-            position: absolute; top: -15px; left: 50%;
-            transform: translateX(-50%);
-            width: 0; height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 25px solid var(--cb-accent);
-            z-index: 10;
-        }
-
-        /* Саме колесо, яке крутиться */
-        .wheel-container {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 5px solid var(--cb-panel);
-            background: radial-gradient(circle, #2c3e50, #000);
-            box-shadow: 0 0 30px rgba(255, 183, 0, 0.2);
-            transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
-            position: relative;
             overflow: hidden;
         }
 
-        /* Розділи колеса (малюємо через CSS) */
-        .wheel-sector {
-            position: absolute; width: 50%; height: 50%;
-            top: 0; left: 50%;
-            transform-origin: 0% 100%;
+        /* Шапка як у мінувальника */
+        .header {
+            width: 100%; max-width: 400px;
+            display: flex; justify-content: space-between;
+            background: var(--panel-bg); padding: 15px;
+            border-radius: 12px; margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* Центральне коло з відсотками */
-        .wheel-center {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90px; height: 90px;
+        .stat-box { display: flex; flex-direction: column; }
+        .label { color: var(--text-gray); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .val { font-size: 20px; font-weight: 900; }
+        .yellow { color: var(--accent-yellow); }
+
+        /* КОЛЕСО */
+        .wheel-area {
+            position: relative; width: 260px; height: 260px;
+            margin: 20px 0;
+        }
+
+        .static-wheel {
+            width: 100%; height: 100%;
             border-radius: 50%;
-            background: #1c2331;
-            border: 3px solid var(--cb-accent);
+            background: radial-gradient(circle, #1e222d 40%, #12151e 100%);
+            border: 8px solid var(--panel-bg);
+            position: relative; overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Жовтий сектор (Шанс) */
+        #chance-sector {
+            position: absolute; width: 100%; height: 100%;
+            background: conic-gradient(var(--accent-yellow) 0deg, transparent 0deg);
+            opacity: 0.2;
+        }
+
+        /* СТРІЛКА, яка буде крутитися */
+        #arrow-container {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            transition: transform 3.5s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
+        .arrow-head {
+            position: absolute; top: -10px; left: 50%;
+            transform: translateX(-50%);
+            width: 20px; height: 30px;
+            background: var(--accent-yellow);
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            filter: drop-shadow(0 0 5px var(--accent-yellow));
+        }
+
+        .center-display {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px; height: 100px;
+            background: var(--panel-bg);
+            border: 4px solid #252a36;
+            border-radius: 50%;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            z-index: 5;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            z-index: 11;
         }
 
-        /* Керування */
+        /* Контролери */
         .controls { width: 100%; max-width: 400px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .c-btn {
-            background: var(--cb-panel); border: 1px solid #283044; color: white;
-            padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;
+        .grid-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        
+        .opt-btn {
+            background: var(--panel-bg); border: 1px solid #2d323e;
+            color: white; padding: 12px; border-radius: 8px;
+            font-weight: 700; cursor: pointer; transition: 0.3s;
         }
-        .c-btn.active { border-color: var(--cb-accent); color: var(--cb-accent); background: rgba(255, 183, 0, 0.05); }
+        .opt-btn.active { border-color: var(--accent-yellow); color: var(--accent-yellow); background: rgba(241, 179, 45, 0.1); }
 
+        .input-wrap {
+            background: var(--panel-bg); border-radius: 12px;
+            padding: 15px; margin-bottom: 15px; text-align: center;
+        }
         input {
-            width: 100%; background: #0e121b; border: 1px solid #283044;
-            border-radius: 12px; padding: 18px; color: white; text-align: center;
-            font-size: 24px; font-weight: 900; margin-bottom: 15px; box-sizing: border-box;
+            background: transparent; border: none; color: white;
+            font-size: 26px; font-weight: 900; width: 100%; outline: none;
+            text-align: center;
         }
 
-        .btn-main {
-            width: 100%;
-            background: linear-gradient(180deg, #ffca43 0%, #ffb700 100%);
+        .btn-go {
+            width: 100%; background: var(--accent-yellow);
             border: none; padding: 20px; border-radius: 12px;
-            color: #4e3800; font-size: 18px; font-weight: 900;
+            color: #000; font-size: 18px; font-weight: 900;
             text-transform: uppercase; cursor: pointer;
-            box-shadow: 0 4px 0 #b38000;
+            transition: 0.2s;
         }
-        .btn-main:active { transform: translateY(2px); box-shadow: 0 2px 0 #b38000; }
-        .disabled { opacity: 0.5; pointer-events: none; }
+        .btn-go:active { transform: scale(0.98); opacity: 0.8; }
+        .btn-go:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        #result-text {
+            margin-top: 10px; font-weight: 700; height: 20px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div><div style="font-size: 10px; color: #888;">БАЛАНС</div><div id="bal" style="font-size: 22px; font-weight: 900; color: var(--cb-accent);">0</div></div>
-        <div style="text-align: right;"><div style="font-size: 10px; color: #888;">ВИГРАШ</div><div id="cur-bet" style="font-size: 22px; font-weight: 900; color: var(--success);">0</div></div>
-    </div>
-
-    <div class="history" id="history"></div>
-
-    <div class="wheel-outer">
-        <div class="wheel-arrow"></div>
-        <div id="wheel" class="wheel-container">
-            </div>
-        <div class="wheel-center">
-            <div id="perc-val" style="font-size: 28px; font-weight: 900; color: var(--cb-accent);">50%</div>
-            <div style="font-size: 9px; color: #888; letter-spacing: 1px;">ШАНС</div>
+        <div class="stat-box">
+            <span class="label">Баланс</span>
+            <span class="val yellow" id="balance-display">0 ₴</span>
+        </div>
+        <div class="stat-box" style="text-align: right;">
+            <span class="label">Можливий виграш</span>
+            <span class="val" id="potential-win" style="color: var(--success-green);">0 ₴</span>
         </div>
     </div>
+
+    <div class="wheel-area">
+        <div class="static-wheel">
+            <div id="chance-sector"></div>
+        </div>
+        <div id="arrow-container">
+            <div class="arrow-head"></div>
+        </div>
+        <div class="center-display">
+            <div id="chance-text" style="font-size: 26px; font-weight: 900; color: var(--accent-yellow);">50%</div>
+            <div class="label" style="font-size: 8px;">шанс</div>
+        </div>
+    </div>
+
+    <div id="result-text"></div>
 
     <div class="controls">
-        <div class="btn-grid">
-            <button class="c-btn" onclick="setChance(25, this)">25%</button>
-            <button class="c-btn active" onclick="setChance(50, this)">50%</button>
-            <button class="c-btn" onclick="setChance(75, this)">75%</button>
+        <div class="grid-btns">
+            <button class="opt-btn" onclick="updateChance(25, this)">25%</button>
+            <button class="opt-btn active" onclick="updateChance(50, this)">50%</button>
+            <button class="opt-btn" onclick="updateChance(75, this)">75%</button>
         </div>
-        
-        <input type="number" id="betField" value="100" oninput="updateUI()">
 
-        <button class="btn-main" id="go" onclick="run()">Покращити</button>
+        <div class="input-wrap">
+            <input type="number" id="bet-input" value="100" oninput="calcWin()">
+        </div>
+
+        <button class="btn-go" id="spin-btn" onclick="handleSpin()">Покращити</button>
     </div>
 
     <script>
@@ -158,116 +172,88 @@
         tg.expand();
 
         let balance = parseInt(localStorage.getItem('total_balance')) || 1000;
-        let chance = 0.5;
+        let currentChance = 0.5;
         let isSpinning = false;
         let currentRotation = 0;
 
-        function updateUI() {
-            document.getElementById('bal').innerText = balance + " ₴";
-            const bet = parseInt(document.getElementById('betField').value) || 0;
-            const prize = Math.floor(bet * (1/chance) * 0.95);
-            document.getElementById('cur-bet').innerText = prize + " ₴";
-            document.getElementById('perc-val').innerText = (chance * 100) + "%";
-            
-            drawWheel();
+        function updateDisplay() {
+            document.getElementById('balance-display').innerText = balance + " ₴";
             localStorage.setItem('total_balance', balance);
+            
+            // Оновлення жовтого сектора
+            const deg = currentChance * 360;
+            document.getElementById('chance-sector').style.background = 
+                `conic-gradient(var(--accent-yellow) 0deg ${deg}deg, transparent ${deg}deg 360deg)`;
+            
+            document.getElementById('chance-text').innerText = (currentChance * 100) + "%";
+            calcWin();
         }
 
-        function setChance(val, el) {
-            if (isSpinning) return;
-            chance = val / 100;
-            document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            updateUI();
+        function calcWin() {
+            const bet = parseInt(document.getElementById('bet-input').value) || 0;
+            const win = Math.floor(bet * (1 / currentChance) * 0.95);
+            document.getElementById('potential-win').innerText = win + " ₴";
+        }
+
+        function updateChance(val, btn) {
+            if(isSpinning) return;
+            currentChance = val / 100;
+            document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateDisplay();
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        // Малюємо сектори колеса (виграш/програш)
-        function drawWheel() {
-            const wheel = document.getElementById('wheel');
-            wheel.innerHTML = ''; // Очистити
-            const winAngle = chance * 360;
-            const loseAngle = 360 - winAngle;
-
-            // Зелений сектор (Виграш)
-            const winSec = document.createElement('div');
-            winSec.style.cssText = `
-                position: absolute; width: 100%; height: 100%;
-                background: conic-gradient(#2ecc7133 0deg ${winAngle}deg, transparent ${winAngle}deg 360deg);
-            `;
-            wheel.appendChild(winSec);
-
-            // Додаємо лінію розділу
-            const line = document.createElement('div');
-            line.style.cssText = `
-                position: absolute; top: 0; left: 50%; width: 2px; height: 50%;
-                background: var(--cb-accent); transform-origin: 50% 100%;
-                transform: translateX(-50%) rotate(${winAngle}deg);
-            `;
-            wheel.appendChild(line);
-        }
-
-        function addHist(win, c) {
-            const h = document.getElementById('history');
-            const i = document.createElement('div');
-            i.className = `hist-item ${win?'win':'lose'}`;
-            i.innerText = `${win?'✔':'✘'} ${c*100}%`;
-            h.prepend(i);
-            if(h.children.length > 5) h.lastChild.remove();
-        }
-
-        function run() {
-            const bet = parseInt(document.getElementById('betField').value);
+        function handleSpin() {
+            const bet = parseInt(document.getElementById('bet-input').value);
             if(bet > balance || bet <= 0 || isSpinning) return;
 
             balance -= bet;
             isSpinning = true;
-            updateUI();
+            document.getElementById('spin-btn').disabled = true;
+            document.getElementById('result-text').innerText = "";
+            updateDisplay();
 
-            const btn = document.getElementById('go');
-            const wheel = document.getElementById('wheel');
-            btn.classList.add('disabled');
-
-            // Розрахунок результату (виграш/програш)
-            const isWin = Math.random() < chance;
+            const isWin = Math.random() < currentChance;
+            const arrow = document.getElementById('arrow-container');
             
-            // Розрахунок кута зупинки (0 градусів — стрілка вказує вгору)
-            // Зелений сектор завжди починається від 0. 
-            // Отже, для виграшу треба зупинитися між 0 та (chance * 360).
-            let stopAngle;
+            // Розрахунок кута:
+            // 0 градусів - це початок жовтого сектора (верх)
+            // Жовтий сектор йде від 0 до (currentChance * 360)
+            let targetDeg;
             if(isWin) {
-                // Випадковий кут усередині зеленого сектора
-                stopAngle = Math.random() * (chance * 360);
+                targetDeg = Math.random() * (currentChance * 360 * 0.9); // Трохи відступаємо від країв
             } else {
-                // Випадковий кут усередині чорного сектора
-                stopAngle = (chance * 360) + (Math.random() * (360 - (chance * 360)));
+                targetDeg = (currentChance * 360) + (Math.random() * (360 - currentChance * 360) * 0.9);
             }
 
-            // Додаємо 5 повних обертів для краси
-            const finalRotation = currentRotation + (360 * 5) + (360 - stopAngle);
-            currentRotation = finalRotation;
+            // Додаємо 5 повних обертів + цільовий кут
+            const totalSpin = currentRotation + (360 * 5) + targetDeg;
+            currentRotation = totalSpin;
             
-            // Запуск анімації
-            wheel.style.transform = `rotate(${finalRotation}deg)`;
+            arrow.style.transform = `rotate(${totalSpin}deg)`;
             tg.HapticFeedback.impactOccurred('medium');
 
             setTimeout(() => {
                 isSpinning = false;
-                btn.classList.remove('disabled');
+                document.getElementById('spin-btn').disabled = false;
                 
                 if(isWin) {
-                    const prize = Math.floor(bet * (1/chance) * 0.95);
+                    const prize = Math.floor(bet * (1 / currentChance) * 0.95);
                     balance += prize;
+                    document.getElementById('result-text').innerText = "ВИГРАШ! 🎉";
+                    document.getElementById('result-text').style.color = "var(--success-green)";
                     tg.HapticFeedback.notificationOccurred('success');
                 } else {
+                    document.getElementById('result-text').innerText = "ПРОГРАШ ✘";
+                    document.getElementById('result-text').style.color = "var(--error-red)";
                     tg.HapticFeedback.notificationOccurred('error');
                 }
-                addHist(isWin, chance);
-                updateUI();
-            }, 4000); // Час анімації в CSS (transition)
+                updateDisplay();
+            }, 3600);
         }
 
-        updateUI();
+        updateDisplay();
     </script>
 </body>
 </html>
