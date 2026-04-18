@@ -9,256 +9,207 @@
         :root {
             --cb-bg: #0e121b;
             --cb-panel: #161b28;
-            --cb-accent: #ffb700; /* Золото Case-Battle */
+            --cb-accent: #ffb700;
             --cb-blue: #2c71ff;
-            --cb-text: #8b95a5;
+            --success: #2ecc71;
+            --error: #e74c3c;
         }
 
         body {
             background-color: var(--cb-bg);
             color: white;
             font-family: 'Exo 2', sans-serif;
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Шапка в стилі Case-Battle */
-        .header-stats {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            justify-content: space-between;
-            background: var(--cb-panel);
-            padding: 15px;
-            border-radius: 12px;
-            border-bottom: 3px solid var(--cb-accent);
-            margin-bottom: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        /* Шапка */
+        .header {
+            width: 100%; max-width: 400px;
+            display: flex; justify-content: space-between;
+            background: var(--cb-panel); padding: 15px;
+            border-radius: 12px; border-bottom: 3px solid var(--cb-accent);
+            margin-bottom: 10px; box-sizing: border-box;
         }
 
-        .stat-box { display: flex; flex-direction: column; }
-        .stat-label { color: var(--cb-text); font-size: 10px; text-transform: uppercase; font-weight: 700; }
-        .stat-value { font-size: 20px; font-weight: 900; color: white; }
-        .balance-num { color: var(--cb-accent); }
-
-        /* Ігрова зона */
-        .main-card {
-            width: 100%;
-            max-width: 400px;
-            background: var(--cb-panel);
-            border-radius: 16px;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .upgrade-slots {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .slot {
-            width: 100px;
-            height: 100px;
-            background: #1c2331;
-            border-radius: 12px;
-            border: 2px solid #283044;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+        /* Історія ігор */
+        .history {
+            display: flex; gap: 8px; margin-bottom: 15px;
+            width: 100%; max-width: 400px; justify-content: center;
             overflow: hidden;
         }
-
-        .slot::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--cb-blue);
+        .hist-item {
+            padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;
+            background: var(--cb-panel); border: 1px solid rgba(255,255,255,0.1);
         }
+        .win { color: var(--success); border-color: var(--success); }
+        .lose { color: var(--error); border-color: var(--error); }
 
-        .slot img { width: 80%; filter: drop-shadow(0 0 10px rgba(44, 113, 255, 0.5)); }
-
-        /* Кнопки вибору шансу */
-        .chance-selector {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+        /* Центральне КОЛО */
+        .circle-container {
+            position: relative; width: 180px; height: 180px;
+            margin: 20px 0; display: flex; align-items: center; justify-content: center;
         }
+        svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        circle {
+            fill: none; stroke-width: 8; stroke-linecap: round;
+        }
+        .circle-bg { stroke: rgba(255,255,255,0.05); }
+        .circle-progress {
+            stroke: var(--cb-accent);
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        .circle-text {
+            position: absolute; text-align: center;
+        }
+        .circle-text div:first-child { font-size: 32px; font-weight: 900; color: var(--cb-accent); }
 
+        /* Слоти */
+        .slots-row {
+            display: flex; gap: 20px; align-items: center; margin-bottom: 20px;
+        }
+        .slot {
+            width: 80px; height: 80px; background: var(--cb-panel);
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .slot img { width: 70%; }
+
+        /* Кнопки та інпут */
+        .controls { width: 100%; max-width: 400px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
         .c-btn {
-            background: #1c2331;
-            border: 1px solid #283044;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: 0.2s;
+            background: var(--cb-panel); border: 1px solid #283044; color: white;
+            padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer;
         }
-
-        .c-btn.active {
-            border-color: var(--cb-accent);
-            color: var(--cb-accent);
-            background: rgba(255, 183, 0, 0.05);
-        }
-
-        /* Поле вводу */
-        .bet-input-container {
-            background: #0e121b;
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #283044;
-        }
+        .c-btn.active { border-color: var(--cb-accent); color: var(--cb-accent); }
 
         input {
-            background: transparent;
-            border: none;
-            color: white;
-            width: 100%;
-            text-align: center;
-            font-size: 22px;
-            font-weight: 900;
-            outline: none;
+            width: 100%; background: #0e121b; border: 1px solid #283044;
+            border-radius: 12px; padding: 15px; color: white; text-align: center;
+            font-size: 20px; font-weight: 900; margin-bottom: 15px; box-sizing: border-box;
         }
 
-        /* Головна кнопка */
-        .btn-upgrade {
-            width: 100%;
-            background: linear-gradient(180deg, #ffca43 0%, #ffb700 100%);
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            color: #4e3800;
-            font-size: 18px;
-            font-weight: 900;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #b38000;
+        .btn-main {
+            width: 100%; background: linear-gradient(180deg, #ffca43 0%, #ffb700 100%);
+            border: none; padding: 18px; border-radius: 12px; color: #4e3800;
+            font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer;
         }
-
-        .btn-upgrade:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #b38000;
-        }
-
-        .loading-ring {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid var(--cb-accent);
-            border-radius: 50%;
-            margin: 20px auto;
-            display: none;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .anim-spin { display: block; animation: spin 0.8s linear infinite; }
+        
+        .anim-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="header-stats">
-        <div class="stat-box">
-            <span class="stat-label">Мій баланс</span>
-            <span class="stat-value balance-num" id="user_balance">0</span>
+    <div class="header">
+        <div><div style="font-size: 10px; color: #888;">БАЛАНС</div><div id="bal" style="font-size: 20px; font-weight: 900; color: var(--cb-accent);">0</div></div>
+        <div style="text-align: right;"><div style="font-size: 10px; color: #888;">СТАВКА</div><div id="cur-bet" style="font-size: 20px; font-weight: 900;">0</div></div>
+    </div>
+
+    <div class="history" id="history">
         </div>
-        <div class="stat-box" style="text-align: right;">
-            <span class="stat-label">Шанс</span>
-            <span class="stat-value" id="current_chance">50%</span>
+
+    <div class="slots-row">
+        <div class="slot"><img src="https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjx2jJemkV09-5lpKKqPrxN7LEmyVQ7MEpiO_E57P5gVO8v11rNWD6LITAdgY9M13W-VS6k-vvgZ_v75jMmyE26ygh4X6InhK-n1gSOat_sh_V"></div>
+        <div style="color: var(--cb-accent); font-size: 24px;">⚡</div>
+        <div class="slot" id="out-slot"><span style="font-size: 24px; opacity: 0.2;">?</span></div>
+    </div>
+
+    <div class="circle-container">
+        <svg viewBox="0 0 160 160">
+            <circle class="circle-bg" cx="80" cy="80" r="70"></circle>
+            <circle id="prog" class="circle-progress" cx="80" cy="80" r="70"></circle>
+        </svg>
+        <div class="circle-text">
+            <div id="perc-val">50%</div>
+            <div style="font-size: 10px; color: #888; letter-spacing: 2px;">ШАНС</div>
         </div>
     </div>
 
-    <div class="main-card">
-        <h2 style="font-size: 16px; color: var(--cb-text); margin-top: 0;">GLOBAL UPGRADE</h2>
+    <div class="controls">
+        <div class="btn-grid">
+            <button class="c-btn" onclick="setChance(25, this)">25%</button>
+            <button class="c-btn active" onclick="setChance(50, this)">50%</button>
+            <button class="c-btn" onclick="setChance(75, this)">75%</button>
+        </div>
         
-        <div class="upgrade-slots">
-            <div class="slot"><img src="https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjx2jJemkV09-5lpKKqPrxN7LEmyVQ7MEpiO_E57P5gVO8v11rNWD6LITAdgY9M13W-VS6k-vvgZ_v75jMmyE26ygh4X6InhK-n1gSOat_sh_V"></div>
-            <div style="font-size: 24px; color: var(--cb-accent);">⚡</div>
-            <div class="slot" id="result-slot"><span style="font-size: 30px; opacity: 0.2;">?</span></div>
-        </div>
+        <input type="number" id="betField" value="100" oninput="updateBetDisplay()">
 
-        <div class="chance-selector">
-            <button class="c-btn" onclick="updateChance(25, this)">25%</button>
-            <button class="c-btn active" onclick="updateChance(50, this)">50%</button>
-            <button class="c-btn" onclick="updateChance(75, this)">75%</button>
-        </div>
-
-        <div class="bet-input-container">
-            <input type="number" id="bet_amount" value="100">
-        </div>
-
-        <div id="loader" class="loading-ring"></div>
-        <button id="main-btn" class="btn-upgrade" onclick="startUpgrade()">Покращити</button>
+        <button class="btn-main" id="go" onclick="run()">Покращити</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // СИНХРОНІЗАЦІЯ: використовуємо один і той самий ключ 'total_balance' для обох ігор
         let balance = parseInt(localStorage.getItem('total_balance')) || 1000;
-        let activeChance = 0.5;
+        let chance = 0.5;
 
         function updateUI() {
-            document.getElementById('user_balance').innerText = balance + " ₴";
+            document.getElementById('bal').innerText = balance + " ₴";
+            document.getElementById('cur-bet').innerText = document.getElementById('betField').value + " ₴";
             localStorage.setItem('total_balance', balance);
+            
+            // Оновлення кола
+            const circle = document.getElementById('prog');
+            const offset = 440 - (440 * (chance * 100)) / 100;
+            circle.style.strokeDashoffset = offset;
+            document.getElementById('perc-val').innerText = (chance * 100) + "%";
         }
 
-        function updateChance(val, el) {
-            activeChance = val / 100;
-            document.getElementById('current_chance').innerText = val + "%";
+        function setChance(val, el) {
+            chance = val / 100;
             document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
+            updateUI();
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        function startUpgrade() {
-            let bet = parseInt(document.getElementById('bet_amount').value);
-            
-            if (bet > balance || bet <= 0) {
-                alert("Недостатньо грошей!");
-                return;
-            }
+        function updateBetDisplay() {
+            document.getElementById('cur-bet').innerText = document.getElementById('betField').value + " ₴";
+        }
+
+        function addHist(win, c) {
+            const h = document.getElementById('history');
+            const i = document.createElement('div');
+            i.className = `hist-item ${win?'win':'lose'}`;
+            i.innerText = `${win?'✔':'✘'} ${c*100}%`;
+            h.prepend(i);
+            if(h.children.length > 5) h.lastChild.remove();
+        }
+
+        function run() {
+            const bet = parseInt(document.getElementById('betField').value);
+            if(bet > balance || bet <= 0) return;
 
             balance -= bet;
             updateUI();
 
-            const btn = document.getElementById('main-btn');
-            const loader = document.getElementById('loader');
-            btn.style.display = 'none';
-            loader.classList.add('anim-spin');
+            const btn = document.getElementById('go');
+            const prog = document.getElementById('prog');
+            btn.disabled = true;
+            prog.classList.add('anim-spin');
 
             setTimeout(() => {
-                loader.classList.remove('anim-spin');
-                btn.style.display = 'block';
+                prog.classList.remove('anim-spin');
+                btn.disabled = false;
                 
-                let win = Math.random() < activeChance;
-                if (win) {
-                    let winAmount = Math.floor(bet * (1 / activeChance) * 0.95);
-                    balance += winAmount;
+                const isWin = Math.random() < chance;
+                if(isWin) {
+                    const prize = Math.floor(bet * (1/chance) * 0.95);
+                    balance += prize;
                     tg.HapticFeedback.notificationOccurred('success');
-                    document.getElementById('result-slot').style.borderColor = "#00ff00";
                 } else {
                     tg.HapticFeedback.notificationOccurred('error');
-                    document.getElementById('result-slot').style.borderColor = "#ff0000";
                 }
+                addHist(isWin, chance);
                 updateUI();
-            }, 1500);
+            }, 1200);
         }
 
-        // При запуску оновлюємо баланс
         updateUI();
     </script>
 </body>
