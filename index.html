@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5dade2; --success: #2ecc71; --error: #e74c3c;
+            --bg: #12161c; --panel: rgba(255, 255, 255, 0.05);
+            --accent: #f39c12;
+        }
+        body {
+            background: var(--bg); color: white; font-family: 'Inter', sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            margin: 0; padding: 15px; height: 100vh; overflow: hidden;
+        }
+        /* Стилізований заголовок як на скріншоті */
+        .header {
+            width: 100%; max-width: 380px; display: flex; justify-content: space-between;
+            padding: 15px; background: var(--panel); border-radius: 15px;
+            border-bottom: 2px solid var(--primary); margin-bottom: 15px;
+        }
+        .balance-val { font-size: 22px; font-weight: 900; color: var(--success); }
+        .chance-val { font-size: 22px; font-weight: 900; color: var(--accent); }
+
+        /* Зона слотів для зброї */
+        .upgrade-area {
+            display: flex; justify-content: space-between; width: 100%; max-width: 380px; gap: 10px; margin-bottom: 20px;
+        }
+        .slot {
+            flex: 1; height: 120px; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 10px; text-align: center; color: #888; transition: 0.3s;
+        }
+        .slot.active { border: 1px solid var(--primary); background: rgba(93, 173, 226, 0.1); color: white; }
+        .slot img { width: 70%; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
+
+        /* Центр: Колесо прогресу */
+        .center-circle {
+            width: 80px; height: 80px; border-radius: 50%; border: 4px solid var(--panel);
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .center-circle.spinning { border-top-color: var(--accent); animation: spin 1s linear infinite; }
+
+        /* Керування ставкою */
+        .controls { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+        input {
+            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 12px; color: white; text-align: center; font-size: 18px; font-weight: 700;
+        }
+        .btn-group { display: flex; gap: 5px; }
+        .btn-opt { flex: 1; padding: 8px; background: var(--panel); border: none; color: white; border-radius: 8px; font-size: 11px; cursor: pointer; }
+
+        .action-btn {
+            width: 100%; border: none; border-radius: 12px; padding: 18px;
+            font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer; color: white;
+            background: linear-gradient(135deg, #5dade2, #2e86c1); transition: 0.2s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        .disabled { opacity: 0.5; pointer-events: none; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div><div style="font-size: 10px; color: #888;">ВАШ БАЛАНС</div><div class="balance-val" id="bal">1000</div></div>
+        <div style="text-align: right;"><div style="font-size: 10px; color: #888;">Шанс успіху</div><div class="chance-val" id="chance">75%</div></div>
+    </div>
+
+    <div class="upgrade-area">
+        <div class="slot active" id="slot-in">
+            <img src="https://cdn-icons-png.flaticon.com/512/8221/8221612.png" id="gun-img">
+            <span>ПРЕДМЕТ</span>
+        </div>
+        <div class="center-circle" id="loader">
+            <span style="font-size: 20px;">⚡</span>
+        </div>
+        <div class="slot" id="slot-out">
+            <div style="font-size: 24px;">?</div>
+            <span>РЕЗУЛЬТАТ</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="btn-group">
+            <button class="btn-opt" onclick="setChance(25)">Важко (25%)</button>
+            <button class="btn-opt" onclick="setChance(50)">Середньо (50%)</button>
+            <button class="btn-opt" onclick="setChance(75)" style="border: 1px solid var(--accent)">Шанс 75%</button>
+        </div>
+
+        <input type="number" id="betField" value="100">
+
+        <div class="btn-group">
+            <button class="btn-opt" onclick="adjustBet(0.5)">x0.5</button>
+            <button class="btn-opt" onclick="adjustBet(2)">x2</button>
+            <button class="btn-opt" onclick="adjustBet('max')">MAX</button>
+        </div>
+
+        <button id="upBtn" class="action-btn" onclick="processUpgrade()">Модернізувати</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let balance = parseInt(localStorage.getItem('user_bal')) || 1000;
+        let winChance = 0.75; // 75%
+
+        function setChance(c) {
+            winChance = c / 100;
+            document.getElementById('chance').innerText = c + '%';
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function adjustBet(val) {
+            let current = parseInt(document.getElementById('betField').value) || 0;
+            if (val === 'max') current = balance;
+            else current = Math.floor(current * val);
+            document.getElementById('betField').value = Math.max(10, Math.min(current, balance));
+        }
+
+        function processUpgrade() {
+            const bet = parseInt(document.getElementById('betField').value);
+            if (bet > balance || bet < 10) {
+                tg.MainButton.setText("Недостатньо коштів").show();
+                setTimeout(() => tg.MainButton.hide(), 2000);
+                return;
+            }
+
+            // Знімаємо гроші
+            balance -= bet;
+            updateUI();
+
+            // Анімація
+            const btn = document.getElementById('upBtn');
+            const loader = document.getElementById('loader');
+            btn.classList.add('disabled');
+            loader.classList.add('spinning');
+
+            setTimeout(() => {
+                loader.classList.remove('spinning');
+                btn.classList.remove('disabled');
+
+                const isWin = Math.random() < winChance;
+
+                if (isWin) {
+                    const prize = Math.floor(bet * (1 / winChance) * 0.9); // Коефіцієнт виграшу
+                    balance += prize;
+                    showResult("УСПІХ! +" + prize, "#2ecc71");
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    showResult("ПОЛОМКА!", "#e74c3c");
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+                updateUI();
+            }, 1500);
+        }
+
+        function showResult(text, color) {
+            const out = document.getElementById('slot-out');
+            out.style.borderColor = color;
+            out.innerHTML = `<b style="color:${color}">${text}</b>`;
+            setTimeout(() => {
+                out.style.borderColor = "rgba(255,255,255,0.2)";
+                out.innerHTML = `<div style="font-size: 24px;">?</div><span>РЕЗУЛЬТАТ</span>`;
+            }, 2000);
+        }
+
+        function updateUI() {
+            document.getElementById('bal').innerText = balance;
+            localStorage.setItem('user_bal', balance);
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
